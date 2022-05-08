@@ -1,6 +1,7 @@
 import React from 'react';
 import logo from './logo.svg';
 import './App.css';
+import WsConnector from './components/WebsocketConnector';
 
 const App = () => (
   <div className="App">
@@ -22,6 +23,7 @@ const App = () => (
         Learn React
       </a>
     </header>
+    <WsConnector />
   </div>
 );
 
