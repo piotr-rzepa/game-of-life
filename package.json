@@ -1,0 +1,36 @@
+{
+  "name": "turborepo-basic-shared",
+  "version": "0.0.0",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "build": "turbo run build",
+    "dev": "turbo run dev --parallel",
+    "lint": "turbo run lint",
+    "format": "prettier --write \"**/*.{ts,tsx,md}\""
+  },
+  "devDependencies": {
+    "@testing-library/jest-dom": "^5.16.4",
+    "@testing-library/react": "^13.2.0",
+    "@testing-library/react-hooks": "^8.0.0",
+    "@testing-library/user-event": "^14.1.1",
+    "@types/jest": "^27.5.0",
+    "@types/winston": "^2.4.4",
+    "esbuild": "^0.14.38",
+    "esbuild-jest": "^0.5.0",
+    "jest": "^28.1.0",
+    "prettier": "latest",
+    "turbo": "latest"
+  },
+  "engines": {
+    "npm": ">=7.0.0",
+    "node": ">=14.0.0"
+  },
+  "packageManager": "yarn@1.22.18",
+  "dependencies": {
+    "dotenv": "^16.0.0"
+  }
+}

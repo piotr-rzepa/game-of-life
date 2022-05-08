@@ -1,0 +1,6 @@
+{
+  "verbose": true,
+  "ignore": ["src/**/*.test.ts", "src/**/*.test.ts"],
+  "watch": ["src"],
+  "exec": "npx ts-node src/index.ts"
+}

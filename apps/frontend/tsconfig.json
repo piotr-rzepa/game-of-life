@@ -1,0 +1,8 @@
+{
+  "extends": "tsconfig/react.json",
+  "compilerOptions": {
+    "baseUrl": "."
+  },
+  "include": ["src/**/*", "react-app-env.d.ts"],
+  "exclude": ["node_modules"]
+}

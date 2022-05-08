@@ -1,0 +1,15 @@
+{
+  "name": "logger",
+  "version": "0.0.0",
+  "main": "./index.ts",
+  "types": "./index.ts",
+  "license": "MIT",
+  "dependencies": {
+    "winston": "^3.7.2"
+  },
+  "devDependencies": {
+    "tsconfig": "*",
+    "config": "*",
+    "typescript": "^4.5.3"
+  }
+}
