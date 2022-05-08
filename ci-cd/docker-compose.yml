@@ -1,0 +1,82 @@
+version: '3.9'
+services:
+  gitlab:
+    image: 'gitlab/gitlab-ee:latest'
+    container_name: ${GITLAB_SERVER_CONTAINER_NAME}
+    hostname: ${GITLAB_SERVER_CONTAINER_NAME}
+    restart: always
+    environment:
+      GITLAB_OMNIBUS_CONFIG: |
+        external_url '${GITLAB_OMNIBUS_CONFIG_EXTERNAL_URL}'
+        gitlab_rails['initial_root_password'] = '${GITLAB_PASSWORD}'
+        gitlab_rails['initial_shared_runners_registration_token'] = '${GITLAB_RUNNER_TOKEN}'
+    ports:
+      - '80:80'
+      - '443:443'
+      - '22:22'
+    volumes:
+      - '${GITLAB_HOME}/config:/etc/gitlab'
+      - '${GITLAB_HOME}/logs:/var/log/gitlab'
+      - '${GITLAB_HOME}/data:/var/opt/gitlab'
+    shm_size: '256m'
+
+  gitlab-runner:
+    image: gitlab/gitlab-runner:latest
+    container_name: ${GITLAB_RUNNER_CONTAINER_NAME}
+    restart: always
+    volumes:
+      - ${GITLAB_RUNNER_CONFIG_DIR}:/etc/gitlab-runner
+      - /var/run/docker.sock:/var/run/docker.sock
+    depends_on:
+      - ${GITLAB_SERVER_CONTAINER_NAME}
+
+  portainer:
+    image: portainer/portainer-ce:latest
+    container_name: ${PORTAINER_CONTAINER_NAME}
+    restart: always
+    ports:
+      - '8000:${PORTAINER_PORT_TCP}'
+      - '9443:${PORTAINER_PORT_HTTP}'
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - portainer_data:/data
+
+  sonarcube:
+    image: sonarqube:community
+    container_name: ${SONARQUBE_CONTAINER_NAME}
+    mem_limit: 4096M
+    mem_reservation: 1024M
+    depends_on:
+      - database
+    environment:
+      - SONAR_JDBC_URL=jdbc:postgresql://${POSTGRES_CONTAINER_NAME}:5432/${POSTGRES_DB_NAME}
+      - SONAR_JDBC_USERNAME=${POSTGRES_USER}
+      - SONAR_JDBC_PASSWORD=${POSTGRES_PASSWORD}
+      - SONAR_WEB_PORT=${SONAR_WEB_PORT}
+    volumes:
+      - sonarqube_data:/opt/sonarqube/data
+      - sonarqube_extensions:/opt/sonarqube/extensions
+      - sonarqube_logs:/opt/sonarqube/logs
+    ports:
+      - '9000:${SONAR_WEB_PORT}'
+
+  database:
+    image: postgres:12
+    container_name: ${POSTGRES_CONTAINER_NAME}
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB_NAME}
+    ports:
+      - '5432:${POSTGRES_PORT}'
+    volumes:
+      - postgresql:/var/lib/postgresql
+      - postgresql_data:/var/lib/postgresql/data
+
+volumes:
+  portainer_data:
+  sonarqube_data:
+  sonarqube_extensions:
+  sonarqube_logs:
+  postgresql:
+  postgresql_data:
