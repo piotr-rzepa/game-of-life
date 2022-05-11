@@ -19,7 +19,10 @@ const io = new Server(server, {
 const { HOST, PORT } = process.env;
 const logger = loggers.get(LoggerLabel.BACKEND);
 
-io.on('connection', () => logger.info('A user connected!'));
+io.on('connection', (socket) => {
+  logger.info('A user connected!');
+  socket.on('elo', (message: any) => console.log(JSON.parse(message)));
+});
 
 server.listen(PORT, () =>
   logger.info(`⚡ Websocket Server is running at http://${HOST}:${PORT}. Alternative url: ws://${HOST}:${PORT}`)
