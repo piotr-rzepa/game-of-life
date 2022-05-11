@@ -11,7 +11,7 @@ It's main focus is to learn following concepts during software application lifec
 
 This repository uses [Yarn](https://classic.yarnpkg.com/lang/en/) as a package manager. It includes the following packages/apps:
 
-### Apps and Packages
+## Apps and Packages
 
 - `frontend`: a [React](https://pl.reactjs.org/) app create using [CRA](https://create-react-app.dev/)
 - `backend`: a [Node.js](https://nodejs.org/en/) app built with [Express](https://expressjs.com/) framework
@@ -21,7 +21,7 @@ This repository uses [Yarn](https://classic.yarnpkg.com/lang/en/) as a package m
 
 Each package/app is 100% [TypeScript](https://www.typescriptlang.org/).
 
-### Utilities
+## Utilities
 
 This turborepo has some additional tools:
 
@@ -30,7 +30,7 @@ This turborepo has some additional tools:
 - [Prettier](https://prettier.io) for code formatting
 - [Craco](https://github.com/gsoft-inc/craco) for configuring CRA without eject
 
-### CI/CD
+## CI/CD
 
 This turborepo, apart from being hosted on GitHub, was developed using locally set up GitLab server, in order to make use of its vast CI/CD support for learning purposes.
 All services required for CI/CD and monitoring functionality are defined inside `ci-cd/docker-compose.yml` file, which contains:
@@ -45,20 +45,20 @@ All services required for CI/CD and monitoring functionality are defined inside 
 
 This repository is used in the `npx create-turbo` command, and selected when choosing which package manager you wish to use with your monorepo (Yarn).
 
-### Build
+## Build
 
 To build all apps and packages, run the following command:
 
-```
+```bash
 cd game-of-life-v2
 yarn run build
 ```
 
-### Develop
+## Develop
 
 To develop all apps and packages, run the following command:
 
-```
+```bash
 cd game-of-life-v2
 yarn run dev
 ```
