@@ -37,7 +37,8 @@ module.exports = {
     'react/boolean-prop-naming': ['error', { rule: '^(is|has)[A-Z]([A-Za-z0-9]?)+' }],
     'react/jsx-boolean-value': ['error', 'always'],
     'react/jsx-no-duplicate-props': ['error', { ignoreCase: false }],
-    'import/no-extraneous-dependencies': 'off'
+    'import/no-extraneous-dependencies': 'off',
+    'import/prefer-default-export': 'off'
   },
   overrides: [
     {

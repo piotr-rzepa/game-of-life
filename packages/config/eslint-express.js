@@ -33,7 +33,9 @@ module.exports = {
   },
   rules: {
     'import/no-self-import': 'off',
-    'import/no-extraneous-dependencies': 'off'
+    'import/no-extraneous-dependencies': 'off',
+    'import/prefer-default-export': 'off',
+    'no-param-reassign': ['error', { props: false }]
   },
   overrides: [
     {
