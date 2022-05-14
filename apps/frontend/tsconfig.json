@@ -3,6 +3,11 @@
   "compilerOptions": {
     "baseUrl": "."
   },
-  "include": ["src/**/*", "react-app-env.d.ts"],
+  "include": [
+    "src/**/*",
+    "react-app-env.d.ts",
+    "../../packages/interfaces/Cell.ts",
+    "../backend/src/libs/randomize-board.ts"
+  ],
   "exclude": ["node_modules"]
 }
