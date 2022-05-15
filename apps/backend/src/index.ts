@@ -4,8 +4,9 @@ import cors from 'cors';
 import { Server } from 'socket.io';
 import { createServer } from 'http';
 import { loggers } from 'winston';
-
 import { LoggerLabel } from 'logger';
+import { EventType, InitializeBoard } from 'interfaces';
+import { randomizeBoard } from './libs';
 
 const app: Express = express();
 app.use(cors());
@@ -20,8 +21,9 @@ const { HOST, PORT } = process.env;
 const logger = loggers.get(LoggerLabel.BACKEND);
 
 io.on('connection', (socket) => {
-  logger.info('A user connected!');
-  socket.on('elo', (message: any) => console.log(JSON.parse(message)));
+  socket.on(EventType.INITIALIZE_BOARD, (payload: InitializeBoard) =>
+    socket.emit(EventType.INITIALIZE_BOARD, randomizeBoard(payload))
+  );
 });
 
 server.listen(PORT, () =>
