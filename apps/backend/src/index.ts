@@ -6,7 +6,7 @@ import { createServer } from 'http';
 import { loggers } from 'winston';
 import { LoggerLabel } from 'logger';
 import { EventType, InitializeBoard } from 'interfaces';
-import { randomizeBoard } from './libs';
+import { randomizeBoard, stateGenerator } from './libs';
 
 const app: Express = express();
 app.use(cors());
@@ -21,9 +21,15 @@ const { HOST, PORT } = process.env;
 const logger = loggers.get(LoggerLabel.BACKEND);
 
 io.on('connection', (socket) => {
-  socket.on(EventType.INITIALIZE_BOARD, (payload: InitializeBoard) =>
-    socket.emit(EventType.INITIALIZE_BOARD, randomizeBoard(payload))
-  );
+  let gen: ReturnType<typeof stateGenerator>;
+  socket.on(EventType.INITIALIZE_BOARD, (payload: InitializeBoard) => {
+    const initializedBoard = randomizeBoard(payload);
+    gen = stateGenerator(initializedBoard);
+    socket.emit(EventType.INITIALIZE_BOARD, initializedBoard);
+  });
+  socket.on(EventType.GENERATION, () => {
+    socket.emit(EventType.GENERATION, gen.next().value);
+  });
 });
 
 server.listen(PORT, () =>
