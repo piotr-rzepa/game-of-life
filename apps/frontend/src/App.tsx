@@ -1,6 +1,5 @@
 import React from 'react';
 import './App.css';
-// import WsConnector from './components/WebsocketConnector';
 import Canvas from './components/Canvas';
 import { WebsocketProvider } from './context';
 

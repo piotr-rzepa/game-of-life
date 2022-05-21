@@ -1,6 +1,7 @@
 import * as React from 'react';
+import { EventType } from 'interfaces';
 import { Websocket } from './Websocket';
-import { showModal } from '../components/Modal';
+import { openNotificationWithIcon } from '../components/Modal';
 
 export const WebsocketContext = React.createContext<Websocket | undefined>(undefined);
 
@@ -17,13 +18,21 @@ export interface Props {
 }
 
 export const WebsocketProvider: React.FC<Props> = ({ children }) => {
-  showModal({
-    type: 'success',
-    displaySeconds: 10,
-    intervalDurationMilliseconds: 1000,
-    title: 'Successfully connected to the websocket'
-  });
-  const websocket = React.useMemo(() => new Websocket('http://localhost:3001'), []);
+  const websocket = React.useMemo(() => new Websocket(process.env.REACT_APP_WEBSOCKET_URL!), []);
+  websocket.addListener(EventType.CONNECT_ERROR, () =>
+    openNotificationWithIcon({
+      type: 'error',
+      message: 'Connection error',
+      description: `Connection with the backend at ${process.env.REACT_APP_WEBSOCKET_URL} server was not established. Reconnecting...`
+    })
+  );
+  websocket.addListener(EventType.CONNECT_SUCCESS, () =>
+    openNotificationWithIcon({
+      type: 'success',
+      message: 'Connection success',
+      description: `Successfully connected to the websocket at ${process.env.REACT_APP_WEBSOCKET_URL}`
+    })
+  );
 
   return <WebsocketContext.Provider value={websocket}>{children}</WebsocketContext.Provider>;
 };
