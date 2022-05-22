@@ -32,7 +32,9 @@
   },
   "packageManager": "yarn@1.22.18",
   "dependencies": {
+    "@types/md5": "^2.3.2",
     "dotenv": "^16.0.0",
+    "md5": "^2.3.0",
     "socket.io": "^4.5.0"
   }
 }

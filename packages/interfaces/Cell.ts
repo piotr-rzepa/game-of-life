@@ -26,4 +26,20 @@ export class Cell {
   public switchState(): void {
     this.state = this.state === CellState.DEAD ? CellState.ALIVE : CellState.DEAD;
   }
+
+  static fromJSON({
+    x,
+    y,
+    gridXIndex,
+    gridYIndex,
+    state
+  }: {
+    x: number;
+    y: number;
+    gridXIndex: number;
+    gridYIndex: number;
+    state: CellState;
+  }) {
+    return new Cell(x, y, gridXIndex, gridYIndex, state);
+  }
 }

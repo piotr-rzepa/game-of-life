@@ -1,7 +1,7 @@
-import { Cell } from './Cell';
+import { GameState } from './game-state';
 
 export interface InitializeBoard {
-  board: Cell[];
+  board: GameState;
   threshold: number;
   seed: string;
 }

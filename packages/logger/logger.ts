@@ -8,12 +8,6 @@ const winstonCustomFormat = printf(({ level, message, label, timestamp }) => {
   return `${timestamp} [${label}] ${level}: ${message}`;
 });
 
-loggers.add(LoggerLabel.FRONTEND, {
-  level: 'info',
-  format: combine(label({ label: LoggerLabel.FRONTEND }), timestamp(), prettyPrint(), winstonCustomFormat),
-  transports: [new transports.Console()]
-});
-
 loggers.add(LoggerLabel.BACKEND, {
   level: 'info',
   format: combine(label({ label: LoggerLabel.BACKEND }), timestamp(), prettyPrint(), winstonCustomFormat),
