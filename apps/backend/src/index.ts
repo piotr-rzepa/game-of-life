@@ -15,7 +15,8 @@ const io = new Server(server, {
   cors: {
     origin: '*',
     methods: ['GET', 'POST']
-  }
+  },
+  maxHttpBufferSize: 1e8
 });
 const { HOST, PORT } = process.env;
 const logger = loggers.get(LoggerLabel.BACKEND);

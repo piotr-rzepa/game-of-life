@@ -1,5 +1,6 @@
 /* eslint-disable no-underscore-dangle */
-import { Cell, CellState } from 'interfaces';
+import { Cell, CellState, GameState } from 'interfaces';
+import md5 from 'md5';
 
 /**
  * Evaluates number of neighbors of given cell that are dead or alive
@@ -12,7 +13,7 @@ export const getNeighborsState = (neighbors: Cell[]) => {
     [CellState.DEAD]: 0
   };
   // eslint-disable-next-line no-return-assign
-  neighbors.forEach((cell) => (result[cell.state] += 1));
+  neighbors.forEach((cell: Cell) => (result[cell.state] += 1));
   return result;
 };
 
@@ -21,52 +22,57 @@ export const getNeighborsState = (neighbors: Cell[]) => {
  * @param cell Cell for which the neighbors should be received
  * @returns Collection of cells that are neighbors of cell provided as an argument
  */
-export const getNeighbors = (cell: Cell, board: Cell[]) => {
-  // TODO: Optimize to not search whole board for each cell
+export const getNeighbors = (cell: Cell, board: GameState): Cell[] => {
   const { gridXIndex: x, gridYIndex: y } = cell;
-  const neighbors = board.filter(
-    ({ gridXIndex, gridYIndex }) =>
-      (gridXIndex === x - 1 && gridYIndex === y) ||
-      (gridXIndex === x + 1 && gridYIndex === y) ||
-      (gridXIndex === x && gridYIndex === y - 1) ||
-      (gridXIndex === x && gridYIndex === y + 1) ||
-      (gridXIndex === x - 1 && gridYIndex === y - 1) ||
-      (gridXIndex === x + 1 && gridYIndex === y - 1) ||
-      (gridXIndex === x - 1 && gridYIndex === y + 1) ||
-      (gridXIndex === x + 1 && gridYIndex === y + 1)
+
+  const neighbors: Cell[] = [];
+
+  // Thanks to converting GameState from collection to dictionary, lookup takes O(1) time
+  neighbors.push(
+    board[md5(`${x - 1}x${y}`)],
+    board[md5(`${x + 1}x${y}`)],
+    board[md5(`${x}x${y - 1}`)],
+    board[md5(`${x}x${y + 1}`)],
+    board[md5(`${x - 1}x${y - 1}`)],
+    board[md5(`${x + 1}x${y - 1}`)],
+    board[md5(`${x - 1}x${y + 1}`)],
+    board[md5(`${x + 1}x${y + 1}`)]
   );
-  return neighbors;
+
+  // Filter possible undefined values emerged from edge cells
+  return neighbors.filter((possibleCell: Cell): possibleCell is Cell => !!possibleCell);
 };
 
 /**
  * Updates states of the board according to the Game of Life rules.
  * @link https://en.wikipedia.org/wiki/Conway%27s_Game_of_Life
- * @param currentState Current state of the cells on board
- * @returns Updated state of the board
+ * @param {GameState} currentState Current state of the cells on board
+ * @returns {GameState} Updated state of the board
  */
-export const createNextGeneration = (currentState: Cell[]) => {
+export const createNextGeneration = (currentState: GameState): GameState => {
   /**
    * Rules:
    * Any live cell with two or three live neighbors survives
    * Any dead cell with three live neighbors becomes a live cell
    * All other live cells die in the next generation. Similarly, all other dead cells stay dead
    */
-  const nextGeneration: Cell[] = [];
 
-  currentState.forEach((cell) => {
-    const neighbors = getNeighbors(cell, currentState);
-    const neighborsState = getNeighborsState(neighbors);
+  const nextGeneration: GameState = Object.fromEntries(
+    Object.entries(currentState).map(([hash, cell]) => {
+      const neighbors = getNeighbors(cell, currentState);
+      const neighborsState = getNeighborsState(neighbors);
 
-    if (
-      (neighborsState[CellState.ALIVE] === 2 || neighborsState[CellState.ALIVE] === 3) &&
-      cell.state === CellState.ALIVE
-    ) {
-      nextGeneration.push(new Cell(cell.x, cell.y, cell.gridXIndex, cell.gridYIndex, CellState.ALIVE));
-    } else if (neighborsState[CellState.ALIVE] === 3 && cell.state === CellState.DEAD) {
-      nextGeneration.push(new Cell(cell.x, cell.y, cell.gridXIndex, cell.gridYIndex, CellState.ALIVE));
-    } else {
-      nextGeneration.push(new Cell(cell.x, cell.y, cell.gridXIndex, cell.gridYIndex, CellState.DEAD));
-    }
-  });
+      if (
+        (neighborsState[CellState.ALIVE] === 2 || neighborsState[CellState.ALIVE] === 3) &&
+        cell.state === CellState.ALIVE
+      ) {
+        return [hash, new Cell(cell.x, cell.y, cell.gridXIndex, cell.gridYIndex, CellState.ALIVE)];
+      }
+      if (neighborsState[CellState.ALIVE] === 3 && cell.state === CellState.DEAD) {
+        return [hash, new Cell(cell.x, cell.y, cell.gridXIndex, cell.gridYIndex, CellState.ALIVE)];
+      }
+      return [hash, new Cell(cell.x, cell.y, cell.gridXIndex, cell.gridYIndex, CellState.DEAD)];
+    })
+  );
   return nextGeneration;
 };
