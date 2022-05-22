@@ -2,7 +2,8 @@
 import '../App.css';
 import React, { MutableRefObject, useEffect, useRef, useState } from 'react';
 import { Button, Slider } from 'antd';
-import { EventType, InitializeBoard, CellState } from 'interfaces';
+import { EventType, InitializeBoard, CellState, GameState } from 'interfaces';
+import md5 from 'md5';
 import { Cell, computeGridDimensions } from '../libs';
 import { useWebsocketContext } from '../context';
 
@@ -23,7 +24,7 @@ enum GameStatus {
 const Canvas: React.FC<Props> = ({ width, height, cellSize, cellFillStyle }): JSX.Element => {
   const canvasRef = useRef<HTMLCanvasElement>(null) as MutableRefObject<HTMLCanvasElement>;
   const websocket = useWebsocketContext();
-  const [gameState, setGameState] = useState<Cell[]>([]);
+  const [gameState, setGameState] = useState<GameState>({});
   const [gameStatus, setGameStatus] = useState<GameStatus>(GameStatus.NOT_INITIALIZED);
   const [timer, setTimer] = useState<NodeJS.Timer | undefined>(undefined);
   const [epoch, setEpoch] = useState<number>(0);
@@ -39,18 +40,19 @@ const Canvas: React.FC<Props> = ({ width, height, cellSize, cellFillStyle }): JS
     Cell.size = currentCellSize;
     Cell.context = context;
 
-    const cellArray: Cell[] = [];
+    const cellDictionary: GameState = {};
 
     for (let y = paddingTop, squaresY = 0; y < Number(height) - paddingBottom; y += currentCellSize, squaresY += 1) {
       for (let x = paddingLeft, squaresX = 0; x < Number(width) - paddingRight; x += currentCellSize, squaresX += 1) {
-        cellArray.push(new Cell(x, y, squaresX, squaresY, CellState.DEAD));
+        const hash = md5(`${squaresX}x${squaresY}`);
+        cellDictionary[hash] = new Cell(x, y, squaresX, squaresY, CellState.DEAD);
       }
     }
-    setGameState(() => [...cellArray]);
+    setGameState(() => cellDictionary);
   };
 
   const drawCells = (): void => {
-    gameState.forEach((cell: Cell) => cell.draw());
+    Object.values(gameState).forEach((cell: Cell) => cell.draw());
   };
 
   const drawGrid = (context: CanvasRenderingContext2D) => {
@@ -85,20 +87,18 @@ const Canvas: React.FC<Props> = ({ width, height, cellSize, cellFillStyle }): JS
   }, [currentCellSize]);
 
   useEffect((): void => {
-    websocket.addListener(EventType.INITIALIZE_BOARD, (payload: Cell[]) => {
-      const newBoard = Array.from(
-        payload,
-        ({ x, y, gridXIndex, gridYIndex, state }) => new Cell(x, y, gridXIndex, gridYIndex, state)
+    websocket.addListener(EventType.INITIALIZE_BOARD, (payload: GameState) => {
+      const newBoard: GameState = Object.fromEntries(
+        Object.entries(payload).map(([hash, cell]) => [hash, Cell.fromJSON(cell)])
       );
-      setGameState(() => [...newBoard]);
+      setGameState(() => newBoard);
     });
     // TODO: Refactor to use same logic by two listeners
     websocket.addListener(EventType.GENERATION, (payload: Cell[]) => {
-      const newBoard = Array.from(
-        payload,
-        ({ x, y, gridXIndex, gridYIndex, state }) => new Cell(x, y, gridXIndex, gridYIndex, state)
+      const newBoard: GameState = Object.fromEntries(
+        Object.entries(payload).map(([hash, cell]) => [hash, Cell.fromJSON(cell)])
       );
-      setGameState(() => [...newBoard]);
+      setGameState(() => newBoard);
       setEpoch((currentEpoch) => currentEpoch + 1);
     });
   }, []);
@@ -124,9 +124,9 @@ const Canvas: React.FC<Props> = ({ width, height, cellSize, cellFillStyle }): JS
       </p>
       <Slider
         defaultValue={100}
-        min={10}
+        min={4}
         max={100}
-        step={5}
+        step={2}
         onChange={(value) => setCurrentCellSize(() => value)}
         disabled={gameStatus === GameStatus.STARTED}
       />
@@ -143,7 +143,7 @@ const Canvas: React.FC<Props> = ({ width, height, cellSize, cellFillStyle }): JS
           setGameStatus(() => GameStatus.STARTED);
           setTimer(
             setInterval(
-              () => websocket.sendEvent<Cell[]>({ type: EventType.GENERATION, payload: gameState }),
+              () => websocket.sendEvent<GameState>({ type: EventType.GENERATION, payload: gameState }),
               gameSpeed
             )
           );

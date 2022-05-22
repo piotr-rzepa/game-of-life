@@ -3,7 +3,7 @@ import './App.css';
 import Canvas from './components/Canvas';
 import { WebsocketProvider } from './context';
 
-const App = () => (
+const App: React.FC = () => (
   <div className="App">
     <header className="App-header">
       <WebsocketProvider>
